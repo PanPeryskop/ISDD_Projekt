@@ -3,15 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Models;
- 
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.Table;
+
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.util.Set;
 
@@ -19,6 +13,11 @@ import java.util.Set;
  *
  * @author stgad
  */
+@NamedNativeQuery(
+        name = "Client.findByMcategoryMemberSQL",
+        query = "SELECT * FROM CLIENT WHERE m_categoryMember = :mcategoryMember",
+        resultClass = Client.class
+)
 @Entity
 @Table(name = "CLIENT")
 @NamedQueries({
@@ -170,5 +169,5 @@ public class Client implements Serializable {
     public String toString() {
         return "Models.Client[ mNum=" + mNum + " ]";
     }
-    
+
 }
