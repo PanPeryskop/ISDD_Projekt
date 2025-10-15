@@ -35,7 +35,7 @@ public class ISDD_Project {
                             List<Client> clients = q.getResultList();
 
                             System.out.println("====================================================================================================================");
-                            System.out.println("NUM"+ "\t" + "NAME"+ "\t" + "ID"+ "\t" + "BIRTHDATE"+ "\t" + "PHONE"+ "\t" + "EMAIL"+ "\t" + "START DATE"+ "\t" + "CATEGORY");
+                            System.out.println("NUM" + "\t" + "NAME" + "\t" + "ID" + "\t" + "BIRTHDATE" + "\t" + "PHONE" + "\t" + "EMAIL" + "\t" + "START DATE" + "\t" + "CATEGORY");
                             System.out.println("====================================================================================================================");
 
                             for (Client c : clients) {
@@ -84,37 +84,37 @@ public class ISDD_Project {
                         try {
                             Query<Client> p = session.createNamedQuery("Client.findAll", Client.class);
                             List<Client> clients3 = p.getResultList();
-                            for (Client c: clients3){
+                            for (Client c : clients3) {
                                 System.out.println(c.getMName());
                             }
                             tr.commit();
                         } catch (Exception e) {
-                            if (tr != null){
+                            if (tr != null) {
                                 tr.rollback();
                             }
                         } finally {
-                            if (session.isOpen()){
+                            if (session.isOpen()) {
                                 session.close();
                             }
                         }
-                    break;
+                        break;
 
-                case "4":
-                     session = sessionFactory.openSession();
-                     tr = session.beginTransaction();
-                     try {
-                         Query<Object[]> q = session.createQuery("SELECT Client.mName, Client.mPhone FROM Client", Object[].class);
-                         List<Object[]> rows = q.getResultList();
-                         for (Object[] row : rows) {
-                            System.out.println(row[0] + " " + row[1]);
-                         }
-                         tr.commit();
-                     } catch (Exception e) {
-                        if (tr != null) tr.rollback();
-                     } finally {
-                        if (session.isOpen()) session.close();
-                     }
-                     break;
+                    case "4":
+                        session = sessionFactory.openSession();
+                        tr = session.beginTransaction();
+                        try {
+                            Query<Object[]> q = session.createQuery("SELECT Client.mName, Client.mPhone FROM Client", Object[].class);
+                            List<Object[]> rows = q.getResultList();
+                            for (Object[] row : rows) {
+                                System.out.println(row[0] + " " + row[1]);
+                            }
+                            tr.commit();
+                        } catch (Exception e) {
+                            if (tr != null) tr.rollback();
+                        } finally {
+                            if (session.isOpen()) session.close();
+                        }
+                        break;
 
                     case "5":
                         session = sessionFactory.openSession();
@@ -157,16 +157,16 @@ public class ISDD_Project {
 
     public static void menu() {
         System.out.println("\n===== MENU =====");
-        System.out.println("1. Pokaż wszystkich członków (HQL)");
-        System.out.println("2. Pokaż wszystkich członków (SQL)");
-        System.out.println("3. Pokaż wszystkich członków (Named Query)");
-        System.out.println("4. Imię i telefon wszystkich członków");
-        System.out.println("5. Imię i kategoria członków z wybranej kategorii");
-        System.out.println("6. Imię monitora po nicku");
-        System.out.println("7. Informacje o członku po imieniu");
-        System.out.println("8. Aktywności wg dnia i opłaty");
-        System.out.println("9. Członkowie wg kategorii (HQL Named Query)");
-        System.out.println("10. Członkowie wg kategorii (SQL Named Query)");
-        System.out.println("0. Wyjście");
+        System.out.println("1. Show all members (HQL)");
+        System.out.println("2. Show all members (SQL)");
+        System.out.println("3. Show all members (Named Query)");
+        System.out.println("4. Name and phone of all members");
+        System.out.println("5. Name and category of members from selected category");
+        System.out.println("6. Monitor's name by nickname");
+        System.out.println("7. Member information by name");
+        System.out.println("8. Activities by day and payment");
+        System.out.println("9. Members by category (HQL Named Query)");
+        System.out.println("10. Members by category (SQL Named Query)");
+        System.out.println("0. Exit");
     }
 }
