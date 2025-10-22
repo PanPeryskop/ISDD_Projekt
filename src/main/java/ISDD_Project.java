@@ -391,6 +391,22 @@ public class ISDD_Project {
                         session = sessionFactory.openSession();
                         tr = session.beginTransaction();
                         try {
+                            System.out.println("Enter activity ID to list members:");
+                            String aId = keyboard.nextLine();
+
+                            Query<String> getMembersQuery = session.createQuery(
+                                    "SELECT c.mName FROM Client c JOIN c.activitySet a WHERE a.aId = :aId", String.class);
+                            getMembersQuery.setParameter("aId", aId);
+
+                            List<String> members = getMembersQuery.getResultList();
+                            if (members.isEmpty()) {
+                                System.out.println("No members found for the given activity.");
+                            } else {
+                                System.out.println("Members enrolled in activity " + aId + ":");
+                                for (String memberName : members) {
+                                    System.out.println("- " + memberName);
+                                }
+                            }
 
 
                         } catch (Exception e) {
@@ -450,6 +466,11 @@ public class ISDD_Project {
         System.out.println("8. Activities by day and payment");
         System.out.println("9. Members by category (HQL Named Query)");
         System.out.println("10. Members by category (SQL Named Query)");
+        System.out.println("11. Insert new member");
+        System.out.println("12. Delete member by ID");
+        System.out.println("13. List activities of a trainer");
+        System.out.println("14. List activities of a member");
+        System.out.println("15. List members of an activity");
         System.out.println("0. Exit");
     }
 }
