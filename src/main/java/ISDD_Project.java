@@ -11,6 +11,10 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+
 public class ISDD_Project {
 
     public static void main(String[] args) {
@@ -240,6 +244,161 @@ public class ISDD_Project {
                             if (session.isOpen()) session.close();
                         }
 
+                        break;
+
+                    case "11":
+                        session = sessionFactory.openSession();
+                        tr = session.beginTransaction();
+                        try {
+                            Query<String> existingIdsQuery = session.createNativeQuery("SELECT m_id FROM CLIENT", String.class);
+                            List<String> clientsIds = existingIdsQuery.getResultList();
+
+                            String mId;
+                            do {
+                                System.out.println("Enter new member id");
+                                mId = keyboard.nextLine();
+                                if (clientsIds.contains(mId)) {
+                                    System.out.println("Member ID already exists. Please enter a different ID.");
+                                } else {
+                                    break;
+                                }
+                            } while (true);
+
+                            System.out.println("Enter new member name");
+                            String mName = keyboard.nextLine();
+                            System.out.println("Enter new member phone");
+                            String mPhone = keyboard.nextLine();
+                            System.out.println("Enter new member email");
+                            String mEmail = keyboard.nextLine();
+                            System.out.println("Enter new member birthdate (yyyy-MM-dd)");
+                            String mBirthdate = keyboard.nextLine();
+                            System.out.println("Enter member category A, B, C, D or E");
+                            String mCategory = keyboard.nextLine().toUpperCase();
+                            String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                            String mNum = "S" + (clientsIds.size() + 1);
+
+                            Query<?> insert = session.createNativeQuery(
+                                    "INSERT INTO CLIENT (m_num, m_id, m_name, m_phone, m_emailMember, m_birthdate, m_startingDateMember, m_categoryMember) " +
+                                    "VALUES (:mNum,:mId, :mName, :mPhone, :mEmail, :mBirthdate, :mStartingDate, :mCategory)"
+                            );
+                            insert.setParameter("mNum", mNum);
+                            insert.setParameter("mId", mId);
+                            insert.setParameter("mName", mName);
+                            insert.setParameter("mPhone", mPhone);
+                            insert.setParameter("mEmail", mEmail);
+                            insert.setParameter("mBirthdate", mBirthdate);
+                            insert.setParameter("mStartingDate", currentDate);
+                            insert.setParameter("mCategory", mCategory.charAt(0));
+
+                            int rows = insert.executeUpdate();
+                            if (rows > 0) {
+                                System.out.println("Member inserted successfully.");
+                            } else {
+                                System.out.println("Insert failed.");
+                            }
+
+                            tr.commit();
+                        } catch (Exception e) {
+                            if (tr != null) tr.rollback();
+                            System.err.println("Error: " + e.getMessage());
+                        } finally {
+                            if (session.isOpen()) session.close();
+                        }
+                        break;
+
+                    case "12":
+                        session = sessionFactory.openSession();
+                        tr = session.beginTransaction();
+                        try {
+                            System.out.println("Enter member ID to delete:");
+                            String mIdToDelete = keyboard.nextLine();
+                            Query<?> deleteQuery = session.createQuery("DELETE FROM Client c WHERE c.mId = :mId");
+                            deleteQuery.setParameter("mId", mIdToDelete);
+                            int rowsAffected = deleteQuery.executeUpdate();
+                            if (rowsAffected > 0) {
+                                System.out.println("Member deleted successfully.");
+                            } else {
+                                System.out.println("No member found with the given ID.");
+                            }
+                            tr.commit();
+                        } catch (Exception e) {
+                            if (tr != null) tr.rollback();
+                            System.err.println("Error: " + e.getMessage());
+                        } finally {
+                            if (session.isOpen()) session.close();
+                        }
+                        break;
+
+                    case "13":
+                        session = sessionFactory.openSession();
+                        tr = session.beginTransaction();
+                        try {
+                            System.out.println("Enter trainer Id  whose activities you want to list:");
+                            String tCod = keyboard.nextLine();
+
+                            Query<String> getActivitiesQuery = session.createQuery(
+                                    "SELECT a.aName FROM Activity a WHERE a.atrainerInCharge.tCod = :tCod", String.class);
+                            getActivitiesQuery.setParameter("tCod", tCod);
+                            List<String> activities = (List<String>) getActivitiesQuery.getResultList();
+                            if (activities.isEmpty()) {
+                                System.out.println("No activities found for the given trainer.");
+                            } else {
+                                System.out.println("Trainers activity" + tCod + ":");
+                                for (String activityName : activities) {
+                                    System.out.println("- " + activityName);
+                                }
+                            }
+
+                        } catch (Exception e) {
+                            if (tr != null) tr.rollback();
+                            System.err.println("Error: " + e.getMessage());
+                        } finally {
+                            if (session.isOpen()) session.close();
+                        }
+                        break;
+
+                    case "14":
+                        session = sessionFactory.openSession();
+                        tr = session.beginTransaction();
+                        try {
+                            System.out.println("Enter member ID to update category:");
+                            String mIdToUpdate = keyboard.nextLine();
+
+                            Query<String> findMemberActivitiesQuery = session.createQuery(
+                                "SELECT a.aName FROM Activity a JOIN a.clientSet c WHERE c.mNum = :mNum", String.class);
+                            findMemberActivitiesQuery.setParameter("mNum", mIdToUpdate);
+
+                            List<String> memberActivities = findMemberActivitiesQuery.getResultList();
+                            if (memberActivities.isEmpty()) {
+                                System.out.println("Member has no activities");
+                            } else {
+                                System.out.println("Member's activities:");
+                                for (String activity: memberActivities){
+                                    System.out.println("- " + activity);
+                                }
+                            }
+
+
+                        } catch (Exception e) {
+                            if (tr != null) tr.rollback();
+                            System.err.println("Error: " + e.getMessage());
+                        } finally {
+                            if (session.isOpen()) session.close();
+                        }
+                        break;
+
+                    case "15":
+                        session = sessionFactory.openSession();
+                        tr = session.beginTransaction();
+                        try {
+
+
+                        } catch (Exception e) {
+                            if (tr != null) tr.rollback();
+                            System.err.println("Error: " + e.getMessage());
+                        } finally {
+                            if (session.isOpen()) session.close();
+                        }
                         break;
 
 
