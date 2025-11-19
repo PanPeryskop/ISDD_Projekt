@@ -6,7 +6,10 @@ target
 target/*
 # BlueJ files
 *.ctxt
-
+.idea
+idea/
+idea
+idea/*
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -23,3 +26,7 @@ target/*
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+ISDD_Proyect/
+ISDD_Proyect/*
+ISDD_Proyect
