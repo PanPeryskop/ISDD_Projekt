@@ -23,7 +23,7 @@ public class ISDD_Project {
 
         new ConnectionController();
 
-        HibernateUtil.close();
+        // HibernateUtil.close();
 
 
 

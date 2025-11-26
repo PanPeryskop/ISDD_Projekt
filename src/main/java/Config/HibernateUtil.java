@@ -9,6 +9,25 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 public class HibernateUtil {
     public static final SessionFactory sessionFactory = buildSessionFactory();
     
+    public static SessionFactory buildSessionFactory(String user, String pass) {
+        try {
+            StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder();
+            registryBuilder.configure("hibernate.cfg.xml");
+            
+            registryBuilder.applySetting("hibernate.connection.username", user);
+            registryBuilder.applySetting("hibernate.connection.password", pass);
+            
+            StandardServiceRegistry serviceRegistry = registryBuilder.build();
+
+            Metadata metadata = new MetadataSources(serviceRegistry).getMetadataBuilder().build();
+
+            return metadata.getSessionFactoryBuilder().build();
+        } catch (Throwable ex) {
+            System.err.println("Initial SessionFactory creation failed." + ex);
+            return null;
+        }
+    }
+
     private static SessionFactory buildSessionFactory(){
         try {
             StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
@@ -25,6 +44,7 @@ public class HibernateUtil {
     }
 
     public static SessionFactory getSessionFactory(){ return sessionFactory;}
+    
     public static void close(){
         if (sessionFactory != null && !sessionFactory.isClosed()) {
             sessionFactory.close();

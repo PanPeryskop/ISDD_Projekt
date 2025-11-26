@@ -1,32 +1,53 @@
 package Controllers;
 
 import Config.HibernateUtil;
+import Views.ConnectionView;
+import Views.MessageView;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import org.hibernate.SessionFactory;
 
-public class ConnectionController {
+public class ConnectionController implements ActionListener {
+
+    private final ConnectionView view;
+    private final MessageView messageView;
 
     public ConnectionController() {
-        SessionFactory sessionFactory = DBConnect();
-        if (sessionFactory == null) {
-            System.err.println("connection failed, unable to connect");
-            System.exit(1);
-        }
-
-        new MainController(sessionFactory);
-
+        this.view = new ConnectionView();
+        this.messageView = new MessageView();
+        
+        addListeners();
+        this.view.setVisible(true);
     }
 
-    public static SessionFactory DBConnect() {
-        SessionFactory sessionFactory = null;
-        try {
-            sessionFactory = HibernateUtil.getSessionFactory();
-            System.out.println("Connected sucesfully");
-            return sessionFactory;
-        } catch (ExceptionInInitializerError e) {
-            var c = e.getCause();
-            System.err.println("Connectio error. check .cfg.xml: " + (c != null ? c.getMessage() : "Unknown cause"));
-            return null;
-        }
+    private void addListeners() {
+        view.addConnectListener(this);
+        view.addCancelListener(this);
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String command = e.getActionCommand();
+        
+        switch (command) {
+            case "AppEntry":
+                String user = view.getUsername();
+                String pass = view.getPassword();
+                
+                SessionFactory sessionFactory = HibernateUtil.buildSessionFactory(user, pass);
+                
+                if (sessionFactory != null) {
+                    messageView.showSuccess("Connection successful!");
+                    view.dispose();
+                    new MainController(sessionFactory);
+                } else {
+                    messageView.showError("Connection failed! Check credentials.");
+                }
+                break;
+                
+            case "Exit":
+                System.exit(0);
+                break;
+        }
+    }
 }

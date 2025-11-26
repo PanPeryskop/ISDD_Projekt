@@ -39,6 +39,14 @@ public class MessageView {
         System.out.println("***********************************");
     }
 
+    public void showSuccess(String message) {
+        javax.swing.JOptionPane.showMessageDialog(null, message, "Success", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void showError(String message) {
+        javax.swing.JOptionPane.showMessageDialog(null, message, "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+    }
+
     private void clearConsole() {
         try {
             new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
