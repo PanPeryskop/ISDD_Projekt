@@ -1,5 +1,6 @@
 package Config;
 
+import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -7,48 +8,56 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
 public class HibernateUtil {
-    public static final SessionFactory sessionFactory = buildSessionFactory();
-    
+
+    private static SessionFactory sessionFactory;
+    private static StandardServiceRegistry serviceRegistry;
+
     public static SessionFactory buildSessionFactory(String user, String pass) {
         try {
-            StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder();
-            registryBuilder.configure("hibernate.cfg.xml");
-            
-            registryBuilder.applySetting("hibernate.connection.username", user);
-            registryBuilder.applySetting("hibernate.connection.password", pass);
-            
-            StandardServiceRegistry serviceRegistry = registryBuilder.build();
+            serviceRegistry = new StandardServiceRegistryBuilder()
+                    .configure("hibernate.cfg.xml")
+                    .applySetting("hibernate.connection.username", user)
+                    .applySetting("hibernate.connection.password", pass)
+                    .applySetting(
+                            "hibernate.connection.url",
+                            "jdbc:mariadb://172.18.1.241:3306/" + user
+                    )
+                    .build();
 
-            Metadata metadata = new MetadataSources(serviceRegistry).getMetadataBuilder().build();
+            Metadata metadata = new MetadataSources(serviceRegistry)
+                    .getMetadataBuilder()
+                    .build();
 
-            return metadata.getSessionFactoryBuilder().build();
-        } catch (Throwable ex) {
-            System.err.println("Initial SessionFactory creation failed." + ex);
+            sessionFactory = metadata.getSessionFactoryBuilder().build();
+            return sessionFactory;
+
+        } catch (HibernateException e) {
+            System.err.println("Error creating SessionFactory: " + e.getMessage());
+
+            if (serviceRegistry != null) {
+                StandardServiceRegistryBuilder.destroy(serviceRegistry);
+            }
+
+            sessionFactory = null;
             return null;
         }
     }
 
-    private static SessionFactory buildSessionFactory(){
+    public static SessionFactory getSessionFactory() {
+        return sessionFactory;
+    }
+
+    public static void close() {
         try {
-            StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                    .configure("hibernate.cfg.xml").build();
-
-            Metadata metadata = new MetadataSources(serviceRegistry).getMetadataBuilder().build();
-
-            return metadata.getSessionFactoryBuilder().build();
-        } catch (Throwable ex) {
-            System.err.println("Initial SessionFactory creation failed." + ex);
-            throw new ExceptionInInitializerError(ex);
-        }
-
-    }
-
-    public static SessionFactory getSessionFactory(){ return sessionFactory;}
-    
-    public static void close(){
-        if (sessionFactory != null && !sessionFactory.isClosed()) {
-            sessionFactory.close();
+            if (sessionFactory != null && !sessionFactory.isClosed()) {
+                sessionFactory.close();
+            }
+        } finally {
+            sessionFactory = null;
+            if (serviceRegistry != null) {
+                StandardServiceRegistryBuilder.destroy(serviceRegistry);
+                serviceRegistry = null;
+            }
         }
     }
-
 }
