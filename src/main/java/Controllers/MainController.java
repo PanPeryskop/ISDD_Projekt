@@ -46,6 +46,7 @@ public class MainController implements ActionListener {
         view.addInitMenuListener(this);
     }
 
+        
     @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
@@ -154,43 +155,3 @@ public class MainController implements ActionListener {
         }
     }
 }
-
-// package Controllers;
-
-// import org.hibernate.SessionFactory;
-// import Views.MessageView;
-// import java.util.Scanner;
-
-// public class MainController {
-
-//     private final SessionFactory sessionFactory;
-//     private MessageView msgView = null;
-
-//     public MainController(SessionFactory sessionFactory) {
-//         this.sessionFactory = sessionFactory;
-//         msgView = new MessageView();
-//         menu();
-//     }
-
-//     private void menu() {
-//         Scanner keyboard = new Scanner(System.in);
-//         String option = "";
-
-//         do {
-//             msgView.menu();
-//             option = keyboard.nextLine();
-
-//             switch (option) {
-//                 case "1":
-//                     new ClientController(sessionFactory);
-//                     break;
-//                 case "2":
-//                     new TrainerController(sessionFactory);
-//                     break;
-//                 case "3":
-//                     new ActivityController(sessionFactory);
-//                     break;
-//             }
-//         } while (!option.equals("4"));
-//     }
-// }
