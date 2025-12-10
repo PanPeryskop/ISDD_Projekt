@@ -71,6 +71,9 @@ public class MainWindow extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         DataTable = new javax.swing.JTable();
         BottomMenuPanel = new javax.swing.JPanel();
+        NewButton = new javax.swing.JButton();
+        deleteButton = new javax.swing.JButton();
+        UpdateButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         InitMenu = new javax.swing.JMenu();
         jMenuItem5 = new javax.swing.JMenuItem();
@@ -115,15 +118,51 @@ public class MainWindow extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(DataTable);
 
+        NewButton.setText("New One");
+        NewButton.setActionCommand("New");
+        NewButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NewButtonActionPerformed(evt);
+            }
+        });
+
+        deleteButton.setText("Delete One");
+        deleteButton.setActionCommand("DeleteOne");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
+
+        UpdateButton.setText("Update One");
+        UpdateButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UpdateButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout BottomMenuPanelLayout = new javax.swing.GroupLayout(BottomMenuPanel);
         BottomMenuPanel.setLayout(BottomMenuPanelLayout);
         BottomMenuPanelLayout.setHorizontalGroup(
             BottomMenuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(BottomMenuPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(NewButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(deleteButton)
+                .addGap(56, 56, 56)
+                .addComponent(UpdateButton)
+                .addContainerGap())
         );
         BottomMenuPanelLayout.setVerticalGroup(
             BottomMenuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 60, Short.MAX_VALUE)
+            .addGroup(BottomMenuPanelLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(BottomMenuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NewButton)
+                    .addComponent(deleteButton)
+                    .addComponent(UpdateButton))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -225,6 +264,18 @@ public class MainWindow extends javax.swing.JFrame {
         //         // TODO add your handling code here:
     }//GEN-LAST:event_ActivitiesMenuActionPerformed
 
+    private void NewButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NewButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_NewButtonActionPerformed
+
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_deleteButtonActionPerformed
+
+    private void UpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_UpdateButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -269,9 +320,12 @@ public class MainWindow extends javax.swing.JFrame {
     public javax.swing.JMenu ClientView;
     public javax.swing.JTable DataTable;
     public javax.swing.JMenu InitMenu;
+    public javax.swing.JButton NewButton;
     public javax.swing.JMenuItem TrainerMenu;
     public javax.swing.JMenu TrainerView;
+    public javax.swing.JButton UpdateButton;
     public javax.swing.JLabel ViewName;
+    public javax.swing.JButton deleteButton;
     public javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JPanel jPanel1;
