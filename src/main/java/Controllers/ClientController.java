@@ -3,163 +3,272 @@ package Controllers;
 
 import Models.Client;
 import Models.ClientDAO;
-import Views.MessageView;
-import Views.ClientView;
+import Views.ActionDialog;
+import Views.MainWindow;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import javax.swing.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Scanner;
+import java.util.List;
 
 public class ClientController {
 
     private final SessionFactory sessionFactory;
-    private final ClientDAO cDAO;
-    private final MessageView vMessages;
-    private final ClientView vClient;
+    private final MainWindow view;
+    private final ClientDAO clientDAO;
 
-    public ClientController(SessionFactory sessionFactory) {
+    public ClientController(SessionFactory sessionFactory, MainWindow view) {
         this.sessionFactory = sessionFactory;
-        this.cDAO = new ClientDAO();
-        this.vMessages = new MessageView();
-        this.vClient = new ClientView();
-        this.menu();
+        this.view = view;
+        this.clientDAO = new ClientDAO();
     }
 
-    private void menu() {
-        Scanner keyboard = new Scanner(System.in);
-        String option;
-        do {
-            // Zaktualizowane menu
-            vMessages.consoleMessage("INFO", "Client menu:\n1 - Add new client\n2 - Show client by member number\n3 - List all clients\n4 - Delete client\n5 - Exit");
-            option = keyboard.nextLine();
-            switch (option) {
-                case "1" -> addClient();
-                case "2" -> showClientByMemberNumber();
-                case "3" -> listAllClients(); // Nowa metoda
-                case "4" -> deleteClient();   // Nowa metoda
-                case "5" -> vMessages.consoleMessage("INFO", "Exiting client menu...");
-                default -> vMessages.consoleMessage("WARNING", "Invalid option. Try again.");
+    public void showAll() {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            List<Client> clients = clientDAO.getAllClients(session);
+
+            String[] columns = {"NUM", "NAME", "ID", "PHONE", "EMAIL", "START DATE", "CATEGORY"};
+            Object[][] data = new Object[clients.size()][7];
+
+            for (int i = 0; i < clients.size(); i++) {
+                Client c = clients.get(i);
+                data[i][0] = c.getMNum();
+                data[i][1] = c.getMName();
+                data[i][2] = c.getMId();
+                data[i][3] = c.getMPhone();
+                data[i][4] = c.getMemailMember();
+                data[i][5] = c.getMstartingDateMember();
+                data[i][6] = c.getMcategoryMember();
             }
-        } while (!option.equals("5"));
+
+            view.setViewName("Clients");
+            view.setTableData(columns, data);
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
     }
 
-    private void addClient() {
+    public void addNew() {
+        ActionDialog dialog = new ActionDialog((java.awt.Frame) view, true);
+        configureDialogForClient(dialog);
+        dialog.setMode(ActionDialog.Mode.ADD);
+        
+        String newId = generateNewId();
+        dialog.setIdValue(newId);
+        dialog.setCreationValue(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        
+        dialog.addConfirmListener(e -> {
+            if (saveClient(dialog, null)) {
+                dialog.setConfirmed(true);
+                dialog.dispose();
+                showAll();
+            }
+        });
+        
+        dialog.addCancelListener(e -> dialog.dispose());
+        dialog.setVisible(true);
+    }
+
+    public void update(int selectedRow) {
+        String mNum = String.valueOf(view.getValueAt(selectedRow, 0));
+        
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            Client client = clientDAO.returnClientByMemberNumber(session, mNum);
+            
+            if (client == null) {
+                JOptionPane.showMessageDialog(view, "Client not found");
+                return;
+            }
+            
+            ActionDialog dialog = new ActionDialog((java.awt.Frame) view, true);
+            configureDialogForClient(dialog);
+            dialog.setMode(ActionDialog.Mode.EDIT);
+            
+            dialog.setIdValue(client.getMNum());
+            dialog.setNameValue(client.getMName());
+            dialog.setIdNrValue(client.getMId());
+            dialog.setPhoneValue(client.getMPhone() != null ? client.getMPhone() : "");
+            dialog.setEmailValue(client.getMemailMember() != null ? client.getMemailMember() : "");
+            dialog.setCreationValue(client.getMstartingDateMember());
+            dialog.setExtraValue(client.getMcategoryMember() != null ? client.getMcategoryMember().toString() : "");
+            
+            final String clientId = mNum;
+            dialog.addConfirmListener(e -> {
+                if (saveClient(dialog, clientId)) {
+                    dialog.setConfirmed(true);
+                    dialog.dispose();
+                    showAll();
+                }
+            });
+            
+            dialog.addCancelListener(e -> dialog.dispose());
+            dialog.setVisible(true);
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
+    }
+
+    public void delete(int selectedRow) {
+        String mNum = String.valueOf(view.getValueAt(selectedRow, 0));
+        
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            Client client = clientDAO.returnClientByMemberNumber(session, mNum);
+            
+            if (client == null) {
+                JOptionPane.showMessageDialog(view, "Client not found");
+                return;
+            }
+            
+            ActionDialog dialog = new ActionDialog((java.awt.Frame) view, true);
+            configureDialogForClient(dialog);
+            dialog.setMode(ActionDialog.Mode.DELETE);
+            
+            dialog.setIdValue(client.getMNum());
+            dialog.setNameValue(client.getMName());
+            dialog.setIdNrValue(client.getMId());
+            dialog.setPhoneValue(client.getMPhone() != null ? client.getMPhone() : "");
+            dialog.setEmailValue(client.getMemailMember() != null ? client.getMemailMember() : "");
+            dialog.setCreationValue(client.getMstartingDateMember());
+            dialog.setExtraValue(client.getMcategoryMember() != null ? client.getMcategoryMember().toString() : "");
+            
+            session.close();
+            session = null;
+            
+            dialog.addConfirmListener(e -> {
+                if (deleteClient(mNum)) {
+                    dialog.dispose();
+                    showAll();
+                }
+            });
+            
+            dialog.addCancelListener(e -> dialog.dispose());
+            dialog.setVisible(true);
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
+    }
+
+    private void configureDialogForClient(ActionDialog dialog) {
+        dialog.configureForClient();
+    }
+
+    private String generateNewId() {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            List<Client> clients = clientDAO.getAllClients(session);
+            int nextNum = clients.size() + 1;
+            return String.format("S%03d", nextNum);
+        } catch (Exception e) {
+            return "S001";
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
+    }
+
+    private boolean saveClient(ActionDialog dialog, String existingId) {
         Session session = null;
         Transaction tr = null;
-        Scanner keyboard = new Scanner(System.in);
         try {
             session = sessionFactory.openSession();
             tr = session.beginTransaction();
-
-            System.out.print("Enter member number (mNum): ");
-            String mNum = keyboard.nextLine();
-            if (cDAO.existMemberNumber(session, mNum)) {
-                vMessages.consoleMessage("ERROR", "Member number already exists.");
-                return;
+            
+            String mNum = dialog.getIdValue();
+            String mName = dialog.getNameValue();
+            String mId = dialog.getIdNrValue();
+            String phone = dialog.getPhoneValue();
+            String email = dialog.getEmailValue();
+            String startDate = dialog.getCreationValue();
+            String categoryStr = dialog.getExtraValue();
+            
+            if (mName.isBlank() || mId.isBlank()) {
+                JOptionPane.showMessageDialog(view, "Name and DNI are required!");
+                return false;
             }
-
-            System.out.print("Enter member ID (DNI): ");
-            String mId = keyboard.nextLine();
-            if (cDAO.existDNI(session, mId)) {
-                vMessages.consoleMessage("ERROR", "Member ID already exists.");
-                return;
+            
+            char category = categoryStr.isBlank() ? 'A' : categoryStr.toUpperCase().charAt(0);
+            
+            Client client;
+            if (existingId != null) {
+                client = clientDAO.returnClientByMemberNumber(session, existingId);
+                if (client == null) {
+                    JOptionPane.showMessageDialog(view, "Client not found!");
+                    return false;
+                }
+                client.setMName(mName);
+                client.setMId(mId);
+                client.setMPhone(phone.isBlank() ? null : phone);
+                client.setMemailMember(email.isBlank() ? null : email);
+                client.setMstartingDateMember(startDate);
+                client.setMcategoryMember(category);
+                session.merge(client);
+            } else {
+                if (clientDAO.existMemberNumber(session, mNum)) {
+                    JOptionPane.showMessageDialog(view, "Member number already exists!");
+                    return false;
+                }
+                if (clientDAO.existDNI(session, mId)) {
+                    JOptionPane.showMessageDialog(view, "DNI already exists!");
+                    return false;
+                }
+                client = new Client(mNum, mName, mId, startDate, category);
+                client.setMPhone(phone.isBlank() ? null : phone);
+                client.setMemailMember(email.isBlank() ? null : email);
+                clientDAO.insertClient(session, client);
             }
-
-            System.out.print("Enter name: ");
-            String mName = keyboard.nextLine();
-
-            System.out.print("Enter phone (optional): ");
-            String mPhone = keyboard.nextLine();
-
-            System.out.print("Enter email (optional): ");
-            String mEmail = keyboard.nextLine();
-
-            System.out.print("Enter birthdate (yyyy-MM-dd) (optional): ");
-            String mBirthdate = keyboard.nextLine();
-
-            System.out.print("Enter category (A-E): ");
-            String category = keyboard.nextLine().trim().toUpperCase();
-            char catChar = (category.isEmpty() ? 'A' : category.charAt(0));
-
-            String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-            Client client = new Client(mNum, mName, mId, currentDate, catChar);
-            client.setMPhone(mPhone != null && !mPhone.isBlank() ? mPhone : null);
-            client.setMemailMember(mEmail != null && !mEmail.isBlank() ? mEmail : null);
-            client.setMBirthdate(mBirthdate != null && !mBirthdate.isBlank() ? mBirthdate : null);
-
-            cDAO.insertClient(session, client);
-
+            
             tr.commit();
-            vMessages.consoleMessage("INFO", "Client inserted successfully.");
+            return true;
+            
         } catch (Exception e) {
             if (tr != null && tr.isActive()) tr.rollback();
-            vMessages.consoleMessage("ERROR", "Insert failed: " + e.getMessage());
+            JOptionPane.showMessageDialog(view, "Error saving: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
         } finally {
             if (session != null && session.isOpen()) session.close();
         }
     }
 
-    private void showClientByMemberNumber() {
-        Session session = null;
-        Scanner keyboard = new Scanner(System.in);
-        try {
-            session = sessionFactory.openSession();
-
-            System.out.print("Enter member number (mNum): ");
-            String mNum = keyboard.nextLine();
-
-            Client c = cDAO.returnClientByMemberNumber(session, mNum);
-            if (c == null) {
-                vMessages.consoleMessage("INFO", "Client not found.");
-            } else {
-                vClient.showClientDetails(c);
-            }
-        } catch (Exception e) {
-            vMessages.consoleMessage("ERROR", "An error occurred: " + e.getMessage());
-        } finally {
-            if (session != null && session.isOpen()) session.close();
-        }
-    }
-
-    private void listAllClients() {
-        Session session = null;
-        try {
-            session = sessionFactory.openSession();
-            java.util.List<Client> clients = cDAO.getAllClients(session);
-            vClient.showClientList(clients);
-        } catch (Exception e) {
-            vMessages.consoleMessage("ERROR", "Error listing clients: " + e.getMessage());
-        } finally {
-            if (session != null && session.isOpen()) session.close();
-        }
-    }
-
-    private void deleteClient() {
+    private boolean deleteClient(String mNum) {
         Session session = null;
         Transaction tr = null;
-        Scanner keyboard = new Scanner(System.in);
         try {
             session = sessionFactory.openSession();
             tr = session.beginTransaction();
-
-            System.out.print("Enter member ID (DNI) to delete: ");
-            String id = keyboard.nextLine();
-
-            Client c = cDAO.getClientById(session, id);
-            if (c != null) {
-                cDAO.deleteClient(session, c);
+            
+            Client client = clientDAO.returnClientByMemberNumber(session, mNum);
+            if (client != null) {
+                clientDAO.deleteClient(session, client);
                 tr.commit();
-                vMessages.consoleMessage("INFO", "Client deleted successfully.");
+                JOptionPane.showMessageDialog(view, "Client deleted successfully!");
+                return true;
             } else {
-                vMessages.consoleMessage("ERROR", "Client not found.");
+                JOptionPane.showMessageDialog(view, "Client not found!");
+                return false;
             }
+            
         } catch (Exception e) {
-            if (tr != null) tr.rollback();
-            vMessages.consoleMessage("ERROR", "Error deleting client: " + e.getMessage());
+            if (tr != null && tr.isActive()) tr.rollback();
+            JOptionPane.showMessageDialog(view, "Error deleting: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
         } finally {
             if (session != null && session.isOpen()) session.close();
         }

@@ -3,13 +3,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
  */
 package Views;
+import java.awt.event.ActionListener;
 
 /**
  *
  * @author stgad
  */
 public class ActionDialog extends javax.swing.JDialog {
-
+    public enum Mode { ADD, EDIT, DELETE }
+    private Mode currentMode;
+    private boolean confirmed = false;
     /**
      * Creates new form ActionDialog
      */
@@ -18,6 +21,113 @@ public class ActionDialog extends javax.swing.JDialog {
         initComponents();
     }
 
+    public void setMode(Mode mode) {
+        this.currentMode = mode;
+        switch (mode) {
+            case ADD -> {
+                dialoLabel.setText("Add New Record");
+                IdForm.setEditable(false);
+                setFieldsEditable(true);
+                clearFields();
+            }
+            case EDIT -> {
+                dialoLabel.setText("Edit Record");
+                IdForm.setEditable(false);
+                setFieldsEditable(true);
+            }
+            case DELETE -> {
+                dialoLabel.setText("Delete Record - Confirm?");
+                IdForm.setEditable(false);
+                setFieldsEditable(false);
+            }
+        }
+    }
+
+    public Mode getMode() {
+        return currentMode;
+    }
+
+    private void setFieldsEditable(boolean editable) {
+        NameForm.setEditable(editable);
+        idNrForm.setEditable(editable);
+        phoneForm.setEditable(editable);
+        emailForm.setEditable(editable);
+        creationForm.setEditable(editable);
+        jTextField7.setEditable(editable);
+    }
+
+    public void clearFields() {
+        IdForm.setText("");
+        NameForm.setText("");
+        idNrForm.setText("");
+        phoneForm.setText("");
+        emailForm.setText("");
+        creationForm.setText("");
+        jTextField7.setText("");
+    }
+    
+    public void configureForClient() {
+        idLabel.setText("Client ID");
+        IdLabel.setText("DNI");
+        nameLabel.setText("Name");
+        phoneLabel.setText("Phone");
+        emailLabel.setText("Email");
+        creationLabel.setText("Start Date");
+        loginLabel.setText("Category");
+    }
+
+    public void configureForTrainer() {
+        idLabel.setText("Trainer COD");
+        IdLabel.setText("ID Number");
+        nameLabel.setText("Name");
+        phoneLabel.setText("Phone");
+        emailLabel.setText("Email");
+        creationLabel.setText("Date");
+        loginLabel.setText("Nick");
+    }
+    
+    public void configureForActivity() {
+        idLabel.setText("Activity ID");
+        IdLabel.setText("Price");
+        nameLabel.setText("Name");
+        phoneLabel.setText("Day");
+        emailLabel.setText("Hour");
+        creationLabel.setText("Description");
+        loginLabel.setText("Trainer COD");
+    }
+    
+    public String getIdValue() { return IdForm.getText().trim(); }
+    public String getNameValue() { return NameForm.getText().trim(); }
+    public String getIdNrValue() { return idNrForm.getText().trim(); }
+    public String getPhoneValue() { return phoneForm.getText().trim(); }
+    public String getEmailValue() { return emailForm.getText().trim(); }
+    public String getCreationValue() { return creationForm.getText().trim(); }
+    public String getExtraValue() { return jTextField7.getText().trim(); }
+
+    
+    public void setIdValue(String value) { IdForm.setText(value); }
+    public void setNameValue(String value) { NameForm.setText(value); }
+    public void setIdNrValue(String value) { idNrForm.setText(value); }
+    public void setPhoneValue(String value) { phoneForm.setText(value); }
+    public void setEmailValue(String value) { emailForm.setText(value); }
+    public void setCreationValue(String value) { creationForm.setText(value); }
+    public void setExtraValue(String value) { jTextField7.setText(value); }
+
+    public void addConfirmListener(ActionListener listener) {
+        confirmButton.addActionListener(listener);
+    }
+
+    public void addCancelListener(ActionListener listener) {
+        cancellButton.addActionListener(listener);
+    }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -62,6 +172,8 @@ public class ActionDialog extends javax.swing.JDialog {
 
         loginLabel.setText("Login");
 
+        IdForm.setEditable(false);
+
         emailForm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 emailFormActionPerformed(evt);
@@ -77,7 +189,7 @@ public class ActionDialog extends javax.swing.JDialog {
 
         cancellButton.setText("Cancel");
 
-        dialoLabel.setText("DialoLabel");
+        dialoLabel.setText("Dialog Label");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

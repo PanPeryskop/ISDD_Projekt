@@ -16,7 +16,7 @@ public class MainWindow extends javax.swing.JFrame {
     /**
      * Creates new form Backup
      */
-    public MainWindow() {
+public MainWindow() {
         initComponents();
     }
     
@@ -34,15 +34,36 @@ public class MainWindow extends javax.swing.JFrame {
         ActivitiesMenu.setActionCommand("ShowActivities");
         ActivitiesMenu.addActionListener(listener);
     }
-    
-        public void addInitMenuListener(ActionListener listener) {
+
+    public void addInitMenuListener(ActionListener listener) {
         jMenuItem5.setActionCommand("ShowInit");
         jMenuItem5.addActionListener(listener);
     }
 
-    // View update methods
+    // ==================== BUTTON LISTENERS ====================
+    
+    public void addNewButtonListener(ActionListener listener) {
+        NewButton.setActionCommand("New");
+        NewButton.addActionListener(listener);
+    }
+
+    public void addDeleteButtonListener(ActionListener listener) {
+        deleteButton.setActionCommand("Delete");
+        deleteButton.addActionListener(listener);
+    }
+
+    public void addUpdateButtonListener(ActionListener listener) {
+        UpdateButton.setActionCommand("Update");
+        UpdateButton.addActionListener(listener);
+    }
+
+    
     public void setViewName(String name) {
         ViewName.setText(name);
+    }
+
+    public String getViewName() {
+        return ViewName.getText();
     }
 
     public void setTableData(String[] columns, Object[][] data) {
@@ -53,6 +74,25 @@ public class MainWindow extends javax.swing.JFrame {
             }
         };
         DataTable.setModel(model);
+    }
+    
+    public int getSelectedRow() {
+        return DataTable.getSelectedRow();
+    }
+
+    public Object getValueAt(int row, int column) {
+        if (row >= 0 && row < DataTable.getRowCount() && column >= 0 && column < DataTable.getColumnCount()) {
+            return DataTable.getValueAt(row, column);
+        }
+        return null;
+    }
+
+    public javax.swing.JTable getDataTable() {
+        return DataTable;
+    }
+
+    public int getRowCount() {
+        return DataTable.getRowCount();
     }
 
 
