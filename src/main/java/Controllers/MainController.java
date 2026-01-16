@@ -25,7 +25,6 @@ public class MainController implements ActionListener {
         this.sessionFactory = sessionFactory;
         this.view = new MainWindow();
         
-        // Initialize sub-controllers
         this.clientController = new ClientController(sessionFactory, view);
         this.trainerController = new TrainerController(sessionFactory, view);
         this.activityController = new ActivityController(sessionFactory, view);
@@ -45,13 +44,11 @@ public class MainController implements ActionListener {
     }
 
     private void addListeners() {
-        // Menu listeners
         view.addClientMenuListener(this);
         view.addTrainerMenuListener(this);
         view.addActivitiesMenuListener(this);
         view.addInitMenuListener(this);
         
-        // Button listeners
         view.addNewButtonListener(this);
         view.addDeleteButtonListener(this);
         view.addUpdateButtonListener(this);
@@ -60,7 +57,6 @@ public class MainController implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
-            // Menu actions
             case "ShowClients" -> {
                 currentView = "Clients";
                 clientController.showAll();
