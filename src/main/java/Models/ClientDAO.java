@@ -3,6 +3,7 @@ package Models;
 import jakarta.persistence.NoResultException;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import java.util.List;
 
 public class ClientDAO {
 
@@ -13,8 +14,7 @@ public class ClientDAO {
         try {
             Query<Client> q = session.createQuery("SELECT c FROM Client c WHERE c.mNum = :mNumValue", Client.class);
             q.setParameter("mNumValue", memberNum);
-            Client c = q.getSingleResult();
-            return c != null;
+            return q.getSingleResult() != null;
         } catch (NoResultException e) {
             return false;
         }
@@ -24,8 +24,7 @@ public class ClientDAO {
         try {
             Query<Client> q = session.createQuery("SELECT c FROM Client c WHERE c.mId = :idValue", Client.class);
             q.setParameter("idValue", dni);
-            Client c = q.getSingleResult();
-            return c != null;
+            return q.getSingleResult() != null;
         } catch (NoResultException e) {
             return false;
         }
@@ -45,7 +44,7 @@ public class ClientDAO {
         }
     }
 
-    public java.util.List<Client> getAllClients(Session session) {
+    public List<Client> getAllClients(Session session) {
         Query<Client> query = session.createQuery("FROM Client", Client.class);
         return query.getResultList();
     }
@@ -54,34 +53,42 @@ public class ClientDAO {
         session.remove(client);
     }
 
-    public java.util.List<Object[]> getClientsByCategory(Session session, char category) {
+    public List<Object[]> getClientsByCategory(Session session, char category) {
         Query<Object[]> query = session.createQuery(
             "SELECT c.mName, c.mcategoryMember FROM Client c WHERE c.mcategoryMember = :cat", Object[].class);
         query.setParameter("cat", category);
         return query.getResultList();
     }
 
-    public java.util.List<Object[]> getNameAndPhone(Session session) {
+    public List<Object[]> getNameAndPhone(Session session) {
         Query<Object[]> query = session.createQuery(
             "SELECT c.mName, c.mPhone FROM Client c", Object[].class);
         return query.getResultList();
     }
 
     public Client getClientByName(Session session, String name) {
-        Query<Client> query = session.createQuery("FROM Client c WHERE c.mName = :name", Client.class);
-        query.setParameter("name", name);
-        return query.uniqueResult();
+        try {
+            Query<Client> query = session.createQuery("FROM Client c WHERE c.mName = :name", Client.class);
+            query.setParameter("name", name);
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
-    public java.util.List<Client> getClientsByCategoryNamed(Session session, char category) {
+    public List<Client> getClientsByCategoryNamed(Session session, char category) {
         Query<Client> query = session.createNamedQuery("Client.findByMcategoryMember", Client.class);
         query.setParameter("mcategoryMember", category);
         return query.getResultList();
     }
 
     public Client getClientById(Session session, String id) {
-        Query<Client> query = session.createQuery("FROM Client c WHERE c.mId = :id", Client.class);
-        query.setParameter("id", id);
-        return query.uniqueResult();
+        try {
+            Query<Client> query = session.createQuery("FROM Client c WHERE c.mId = :id", Client.class);
+            query.setParameter("id", id);
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 }

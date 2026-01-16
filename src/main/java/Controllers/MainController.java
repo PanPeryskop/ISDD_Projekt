@@ -52,6 +52,10 @@ public class MainController implements ActionListener {
         view.addNewButtonListener(this);
         view.addDeleteButtonListener(this);
         view.addUpdateButtonListener(this);
+        
+        view.addApplyFilterListener(this); 
+        view.addJoinButtonListener(this); 
+        view.addStatsListener(this);
     }
 
     @Override
@@ -68,15 +72,23 @@ public class MainController implements ActionListener {
             case "ShowActivities" -> {
                 currentView = "Activities";
                 activityController.showAll();
+                activityController.loadEnrollmentData();
             }
             case "ShowInit" -> {
                 currentView = "Init";
                 showInit();
             }
-            // Button actions
             case "New" -> handleNew();
             case "Delete" -> handleDelete();
             case "Update" -> handleUpdate();
+            
+            case "ApplyFilter" -> {
+                if ("Activities".equals(currentView)) {
+                    activityController.filterActivitiesUI();
+                }
+            }
+            case "JoinSquad" -> activityController.enrollMemberFromUI();
+            case "ShowStats" -> activityController.showStats();
         }
     }
 

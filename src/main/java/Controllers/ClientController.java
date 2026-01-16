@@ -198,9 +198,30 @@ public class ClientController {
             String email = dialog.getEmailValue();
             String startDate = dialog.getCreationValue();
             String categoryStr = dialog.getExtraValue();
+
             
-            if (mName.isBlank() || mId.isBlank()) {
-                JOptionPane.showMessageDialog(view, "Name and DNI are required!");
+            if (mName.isBlank() || mId.isBlank() || startDate.isBlank()) {
+                JOptionPane.showMessageDialog(view, "Name, DNI and Birth Date are required!");
+                return false;
+            }
+
+            if (!Utils.Validator.isValidId(mId)) {
+                JOptionPane.showMessageDialog(view, "Invalid DNI format! Must be 8 digits + 1 Uppercase Letter.");
+                return false;
+            }
+
+            if (!email.isBlank() && !Utils.Validator.isValidEmail(email)) {
+                JOptionPane.showMessageDialog(view, "Invalid Email format (xxx@xxx.xx)!");
+                return false;
+            }
+
+            if (!phone.isBlank() && !Utils.Validator.isValidPhone(phone)) {
+                JOptionPane.showMessageDialog(view, "Invalid Phone format!");
+                return false;
+            }
+            
+            if (!Utils.Validator.isValidDate(startDate)) {
+                JOptionPane.showMessageDialog(view, "Client must be at least 18 years old and date format must be yyyy-MM-dd!");
                 return false;
             }
             

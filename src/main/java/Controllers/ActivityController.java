@@ -2,6 +2,8 @@ package Controllers;
 
 import Models.Activity;
 import Models.ActivityDAO;
+import Models.Client;
+import Models.ClientDAO;
 import Models.Trainer;
 import Views.ActionDialog;
 import Views.MainWindow;
@@ -18,11 +20,13 @@ public class ActivityController {
     private final SessionFactory sessionFactory;
     private final MainWindow view;
     private final ActivityDAO activityDAO;
+    private final ClientDAO clientDAO;
 
     public ActivityController(SessionFactory sessionFactory, MainWindow view) {
         this.sessionFactory = sessionFactory;
         this.view = view;
         this.activityDAO = new ActivityDAO();
+        this.clientDAO = new ClientDAO();
     }
 
     public void showAll() {
@@ -31,24 +35,8 @@ public class ActivityController {
             session = sessionFactory.openSession();
             Query<Activity> query = session.createQuery("FROM Activity", Activity.class);
             List<Activity> activities = query.getResultList();
-
-            String[] columns = {"ID", "NAME", "DESCRIPTION", "PRICE", "DAY", "HOUR", "TRAINER"};
-            Object[][] data = new Object[activities.size()][7];
-
-            for (int i = 0; i < activities.size(); i++) {
-                Activity a = activities.get(i);
-                data[i][0] = a.getAId();
-                data[i][1] = a.getAName();
-                data[i][2] = a.getADescription();
-                data[i][3] = a.getAPrice();
-                data[i][4] = a.getADay();
-                data[i][5] = a.getAHour();
-                data[i][6] = a.getAtrainerInCharge() != null ? a.getAtrainerInCharge().getTCod() : "N/A";
-            }
-
+            updateTable(activities);
             view.setViewName("Activities");
-            view.setTableData(columns, data);
-
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } finally {
@@ -56,13 +44,141 @@ public class ActivityController {
         }
     }
 
-    public void addNew() {
-        ActionDialog dialog = new ActionDialog((java.awt.Frame) view, true);
-        dialog.configureForActivity();
-        dialog.setMode(ActionDialog.Mode.ADD);
+    private void updateTable(List<Activity> activities) {
+        String[] columns = {"ID", "NAME", "DESCRIPTION", "PRICE", "DAY", "HOUR", "TRAINER"};
+        Object[][] data = new Object[activities.size()][7];
 
-        String newId = generateNewId();
-        dialog.setIdValue(newId);
+        for (int i = 0; i < activities.size(); i++) {
+            Activity a = activities.get(i);
+            data[i][0] = a.getAId();
+            data[i][1] = a.getAName();
+            data[i][2] = a.getADescription();
+            data[i][3] = a.getAPrice();
+            data[i][4] = a.getADay();
+            data[i][5] = a.getAHour();
+            data[i][6] = a.getAtrainerInCharge() != null ? a.getAtrainerInCharge().getTName() : "N/A";
+        }
+        view.setTableData(columns, data);
+    }
+
+    public void loadEnrollmentData() {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            
+            List<Client> clients = clientDAO.getAllClients(session);
+            view.getCmbEnrollClient().removeAllItems();
+            for(Client c : clients) {
+                view.getCmbEnrollClient().addItem(c.getMId() + " - " + c.getMName());
+            }
+
+            List<Activity> activities = session.createQuery("FROM Activity", Activity.class).getResultList();
+            view.getCmbEnrollActivity().removeAllItems();
+            for(Activity a : activities) {
+                view.getCmbEnrollActivity().addItem(a.getAId() + " - " + a.getAName());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+    }
+
+    public void enrollMemberFromUI() {
+        String clientStr = (String) view.getCmbEnrollClient().getSelectedItem();
+        String activityStr = (String) view.getCmbEnrollActivity().getSelectedItem();
+        
+        if (clientStr == null || activityStr == null) return;
+
+        String clientDNI = clientStr.split(" - ")[0];
+        String activityID = activityStr.split(" - ")[0];
+
+        Session session = null;
+        Transaction tr = null;
+        try {
+            session = sessionFactory.openSession();
+            tr = session.beginTransaction();
+
+            Client c = clientDAO.getClientById(session, clientDNI); 
+            
+            if(c == null) {
+                JOptionPane.showMessageDialog(view, "Client not found!"); 
+                return; 
+            }
+
+            session.createNativeQuery("INSERT INTO PERFORMS (p_id, p_num) VALUES (:aid, :mnum)")
+                    .setParameter("aid", activityID)
+                    .setParameter("mnum", c.getMNum())
+                    .executeUpdate();
+
+            tr.commit();
+            JOptionPane.showMessageDialog(view, "Success! Member enrolled.");
+
+        } catch (Exception e) {
+            if(tr != null) tr.rollback();
+            JOptionPane.showMessageDialog(view, "Enrollment Failed: " + e.getMessage());
+        } finally {
+            if (session != null) session.close();
+        }
+    }
+
+    public void filterActivitiesUI() {
+        String day = (String) view.getCmbFilterDay().getSelectedItem();
+        String priceStr = view.getFilterPrice();
+
+        if (priceStr.isEmpty()) {
+            JOptionPane.showMessageDialog(view, "Enter price!");
+            return;
+        }
+
+        try {
+            int price = Integer.parseInt(priceStr);
+            Session session = sessionFactory.openSession();
+            
+            List<Object[]> results = activityDAO.getActivitiesByDayAndPrice(session, day, price);
+            
+            String[] columns = {"NAME", "DAY", "PRICE"};
+            Object[][] data = new Object[results.size()][3];
+            for(int i=0; i<results.size(); i++) {
+                data[i][0] = results.get(i)[0];
+                data[i][1] = results.get(i)[1];
+                data[i][2] = results.get(i)[2];
+            }
+            view.setTableData(columns, data);
+            
+            session.close();
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(view, "Price must be a number!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void showStats() {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            String stats = activityDAO.executeStatsProcedure(session);
+            JOptionPane.showMessageDialog(view, "Statistics:\n" + stats);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(view, "Error executing procedure: " + e.getMessage());
+        } finally {
+            if (session != null) session.close();
+        }
+    }
+
+    public void addNew() {
+        ActionDialog dialog = new ActionDialog(view, true);
+        dialog.setMode(ActionDialog.Mode.ADD);
+        dialog.configureForActivity();
+        dialog.setIdValue(generateNewId());
+
+        Session session = sessionFactory.openSession();
+        List<String> trainers = session.createQuery("SELECT t.tName FROM Trainer t", String.class).getResultList();
+        dialog.setGenericComboModel(trainers.toArray(new String[0]));
+        session.close();
 
         dialog.addConfirmListener(e -> {
             if (saveActivity(dialog, null)) {
@@ -89,9 +205,12 @@ public class ActivityController {
                 return;
             }
 
-            ActionDialog dialog = new ActionDialog((java.awt.Frame) view, true);
+            ActionDialog dialog = new ActionDialog(view, true);
             dialog.configureForActivity();
             dialog.setMode(ActionDialog.Mode.EDIT);
+
+            List<String> trainers = session.createQuery("SELECT t.tName FROM Trainer t", String.class).getResultList();
+            dialog.setGenericComboModel(trainers.toArray(new String[0]));
 
             dialog.setIdValue(activity.getAId());
             dialog.setNameValue(activity.getAName());
@@ -99,7 +218,10 @@ public class ActivityController {
             dialog.setPhoneValue(activity.getADay());
             dialog.setEmailValue(String.valueOf(activity.getAHour()));
             dialog.setCreationValue(activity.getADescription());
-            dialog.setExtraValue(activity.getAtrainerInCharge() != null ? activity.getAtrainerInCharge().getTCod() : "");
+            
+            if (activity.getAtrainerInCharge() != null) {
+                dialog.setExtraValue(activity.getAtrainerInCharge().getTName());
+            }
 
             final String activityId = aId;
             dialog.addConfirmListener(e -> {
@@ -133,17 +255,12 @@ public class ActivityController {
                 return;
             }
 
-            ActionDialog dialog = new ActionDialog((java.awt.Frame) view, true);
+            ActionDialog dialog = new ActionDialog(view, true);
             dialog.configureForActivity();
             dialog.setMode(ActionDialog.Mode.DELETE);
 
             dialog.setIdValue(activity.getAId());
             dialog.setNameValue(activity.getAName());
-            dialog.setIdNrValue(String.valueOf(activity.getAPrice()));
-            dialog.setPhoneValue(activity.getADay());
-            dialog.setEmailValue(String.valueOf(activity.getAHour()));
-            dialog.setCreationValue(activity.getADescription());
-            dialog.setExtraValue(activity.getAtrainerInCharge() != null ? activity.getAtrainerInCharge().getTCod() : "");
 
             session.close();
             session = null;
@@ -192,21 +309,51 @@ public class ActivityController {
             String aDay = dialog.getPhoneValue();
             String hourStr = dialog.getEmailValue();
             String aDescription = dialog.getCreationValue();
-            String trainerCod = dialog.getExtraValue();
+            String trainerName = dialog.getExtraValue();
 
             if (aName.isBlank() || aDescription.isBlank()) {
                 JOptionPane.showMessageDialog(view, "Name and Description are required!");
                 return false;
             }
 
-            int price = priceStr.isBlank() ? 0 : Integer.parseInt(priceStr);
-            int hour = hourStr.isBlank() ? 0 : Integer.parseInt(hourStr);
+            int price = 0;
+            int hour = 0;
+            try {
+                price = priceStr.isBlank() ? 0 : Integer.parseInt(priceStr);
+                hour = hourStr.isBlank() ? 0 : Integer.parseInt(hourStr);
+
+                if (price < 0) {
+                    JOptionPane.showMessageDialog(view, "Price must be a positive number!");
+                    return false;
+                }
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(view, "Price and Hour must be valid numbers!", "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
 
             Trainer trainer = null;
-            if (!trainerCod.isBlank()) {
-                Query<Trainer> tQuery = session.createQuery("FROM Trainer t WHERE t.tCod = :cod", Trainer.class);
-                tQuery.setParameter("cod", trainerCod);
+            if (!trainerName.isBlank()) {
+                Query<Trainer> tQuery = session.createQuery("FROM Trainer t WHERE t.tName = :name", Trainer.class);
+                tQuery.setParameter("name", trainerName);
                 trainer = tQuery.uniqueResult();
+
+                if (trainer != null) {
+                    boolean checkConflict = true;
+                    if (existingId != null) {
+                        Activity existing = activityDAO.returnActivityByID(session, existingId);
+                        if (existing != null && existing.getADay().equals(aDay) && 
+                            existing.getAHour() == hour &&
+                            existing.getAtrainerInCharge().getTCod().equals(trainer.getTCod())) {
+                            checkConflict = false;
+                        }
+                    }
+
+                    if (checkConflict && activityDAO.checkTrainerConflict(session, trainer, aDay, hour)) {
+                        JOptionPane.showMessageDialog(view, "Trainer is already busy at this time!");
+                        return false;
+                    }
+                }
             }
 
             Activity activity;
@@ -232,9 +379,6 @@ public class ActivityController {
             tr.commit();
             return true;
 
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(view, "Price and Hour must be numbers!", "Error", JOptionPane.ERROR_MESSAGE);
-            return false;
         } catch (Exception e) {
             if (tr != null && tr.isActive()) tr.rollback();
             JOptionPane.showMessageDialog(view, "Error saving: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -256,16 +400,12 @@ public class ActivityController {
             if (activity != null) {
                 session.remove(activity);
                 tr.commit();
-                JOptionPane.showMessageDialog(view, "Activity deleted successfully!");
                 return true;
-            } else {
-                JOptionPane.showMessageDialog(view, "Activity not found!");
-                return false;
             }
+            return false;
 
         } catch (Exception e) {
             if (tr != null && tr.isActive()) tr.rollback();
-            JOptionPane.showMessageDialog(view, "Error deleting: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         } finally {
             if (session != null && session.isOpen()) session.close();

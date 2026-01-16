@@ -1,11 +1,14 @@
 package Utils;
 
+import java.time.LocalDate;
+import java.time.Period;
+
 public class Validator {
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
     private static final String PHONE_REGEX = "^\\d{9,15}$";
     private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
     private static final String NAME_REGEX = "^[a-zA-Záéíóúàèìòùäëïöüñśćęąńóżź\\s\\-]{2,100}$";
-    private static final String ID_REGEX = "^[a-zA-Z0-9\\-]{5,20}$";
+    private static final String ID_REGEX = "^\\d{8}[A-Z]$";
     private static final String ACTIVITY_NAME_REGEX = "^[a-zA-Z0-9áéíóúàèìòùäëïöüñśćęąńóżź\\s\\-]{3,100}$";
     private static final String DAY_REGEX = "^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$";
     private static final String NUMERIC_REGEX = "^[0-9]+$";
@@ -19,7 +22,16 @@ public class Validator {
     }
 
     public static boolean isValidDate(String date) {
-        return date != null && date.matches(DATE_REGEX);
+        if (date == null || !date.matches(DATE_REGEX)) {
+            return false;
+        }
+        try {
+            LocalDate birthDate = LocalDate.parse(date);
+            int age = Period.between(birthDate, LocalDate.now()).getYears();
+            return age >= 18;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static boolean isValidName(String name) {

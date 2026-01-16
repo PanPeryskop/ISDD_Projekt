@@ -3,6 +3,7 @@ package Models;
 import jakarta.persistence.NoResultException;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import java.util.List;
 
 public class ActivityDAO {
 
@@ -13,9 +14,21 @@ public class ActivityDAO {
         try {
             Query<Activity> q = session.createQuery("SELECT a FROM Activity a WHERE a.aId = :idValue", Activity.class);
             q.setParameter("idValue", activityId);
-            Activity a = q.getSingleResult();
-            return a != null;
+            return q.getSingleResult() != null;
         } catch (NoResultException e) {
+            return false;
+        }
+    }
+
+    public boolean checkTrainerConflict(Session session, Trainer trainer, String day, int hour) {
+        try {
+            Query<Long> query = session.createQuery(
+                "SELECT count(a) FROM Activity a WHERE a.atrainerInCharge = :trainer AND a.aDay = :day AND a.aHour = :hour", Long.class);
+            query.setParameter("trainer", trainer);
+            query.setParameter("day", day);
+            query.setParameter("hour", hour);
+            return query.uniqueResult() > 0;
+        } catch (Exception e) {
             return false;
         }
     }
@@ -30,7 +43,7 @@ public class ActivityDAO {
         }
     }
 
-    public java.util.List<Object[]> getActivitiesByTrainer(Session session, Trainer trainer) {
+    public List<Object[]> getActivitiesByTrainer(Session session, Trainer trainer) {
         Query<Object[]> query = session.createQuery(
             "SELECT a.aName, a.aDay, a.aPrice FROM Activity a WHERE a.atrainerInCharge = :trainer",
             Object[].class);
@@ -38,7 +51,7 @@ public class ActivityDAO {
         return query.getResultList();
     }
 
-    public java.util.List<Object[]> getActivitiesByClient(Session session, Client client) {
+    public List<Object[]> getActivitiesByClient(Session session, Client client) {
         Query<Object[]> query = session.createQuery(
             "SELECT a.aName, a.aDay, a.aPrice FROM Activity a JOIN a.clientSet c WHERE c = :client",
             Object[].class);
@@ -46,7 +59,7 @@ public class ActivityDAO {
         return query.getResultList();
     }
 
-    public java.util.List<Object[]> getActivitiesByDayAndPrice(Session session, String day, int price) {
+    public List<Object[]> getActivitiesByDayAndPrice(Session session, String day, int price) {
         Query<Object[]> query = session.createQuery(
             "SELECT a.aName, a.aDay, a.aPrice FROM Activity a WHERE a.aDay = :day AND a.aPrice <= :price",
             Object[].class);
@@ -56,17 +69,32 @@ public class ActivityDAO {
     }
 
     public Activity getActivityByName(Session session, String name) {
-        Query<Activity> query = session.createQuery(
-            "FROM Activity a WHERE a.aName = :name", Activity.class);
-        query.setParameter("name", name);
-        return query.uniqueResult();
+        try {
+            Query<Activity> query = session.createQuery(
+                "FROM Activity a WHERE a.aName = :name", Activity.class);
+            query.setParameter("name", name);
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
-    public java.util.List<Object[]> getMembersByActivity(Session session, Activity activity) {
+    public List<Object[]> getMembersByActivity(Session session, Activity activity) {
         Query<Object[]> query = session.createQuery(
             "SELECT c.mName, c.memailMember FROM Activity a JOIN a.clientSet c WHERE a = :activity",
             Object[].class);
         query.setParameter("activity", activity);
         return query.getResultList();
+    }
+
+    public String executeStatsProcedure(Session session) {
+        try {
+            Query<Object> query = session.createNativeQuery("CALL GetStatistics()", Object.class);
+            List<Object> result = query.getResultList();
+            if (result.isEmpty()) return "No stats available.";
+            return result.get(0).toString();
+        } catch (Exception e) {
+            return "Error executing stats: " + e.getMessage();
+        }
     }
 }

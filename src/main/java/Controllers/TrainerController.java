@@ -200,8 +200,19 @@ public class TrainerController {
             String tDate = dialog.getCreationValue();
             String tNick = dialog.getExtraValue();
             
-            if (tName.isBlank() || tidNumber.isBlank()) {
-                JOptionPane.showMessageDialog(view, "Name and ID Number are required!");
+            if (!Utils.Validator.isValidId(tidNumber)) {
+                JOptionPane.showMessageDialog(view, "Invalid DNI format! Must be 8 digits + 1 Uppercase Letter.");
+                return false;
+            }
+
+            try {
+                LocalDate date = LocalDate.parse(tDate);
+                if (date.isAfter(LocalDate.now())) {
+                    JOptionPane.showMessageDialog(view, "Entry date cannot be in the future!");
+                    return false;
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(view, "Invalid date format (yyyy-MM-dd)!");
                 return false;
             }
             

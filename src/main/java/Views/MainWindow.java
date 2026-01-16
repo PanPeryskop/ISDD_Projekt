@@ -16,8 +16,11 @@ public class MainWindow extends javax.swing.JFrame {
     /**
      * Creates new form Backup
      */
-public MainWindow() {
+    public MainWindow() {
         initComponents();
+        cmbFilterDay.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { 
+            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" 
+        }));
     }
     
     public void addClientMenuListener(ActionListener listener) {
@@ -40,8 +43,6 @@ public MainWindow() {
         jMenuItem5.addActionListener(listener);
     }
 
-    // ==================== BUTTON LISTENERS ====================
-    
     public void addNewButtonListener(ActionListener listener) {
         NewButton.setActionCommand("New");
         NewButton.addActionListener(listener);
@@ -56,8 +57,17 @@ public MainWindow() {
         UpdateButton.setActionCommand("Update");
         UpdateButton.addActionListener(listener);
     }
-
     
+    public void addApplyFilterListener(ActionListener listener) {
+        btnApplyFilter.setActionCommand("ApplyFilter");
+        btnApplyFilter.addActionListener(listener);
+    }
+    
+    public void addJoinButtonListener(ActionListener listener) {
+        joinButton.setActionCommand("JoinSquad");
+        joinButton.addActionListener(listener);
+    }
+
     public void setViewName(String name) {
         ViewName.setText(name);
     }
@@ -86,16 +96,31 @@ public MainWindow() {
         }
         return null;
     }
+    
+    public javax.swing.JComboBox<String> getCmbEnrollClient() {
+        return cmbEnrollClient;
+    }
+    
+    public javax.swing.JComboBox<String> getCmbEnrollActivity() {
+        return cmbEnrollActivity;
+    }
+    
+    public javax.swing.JComboBox<String> getCmbFilterDay() {
+        return cmbFilterDay;
+    }
+    
+    public String getFilterPrice() {
+        return txtFilterPrice.getText().trim();
+    }
 
     public javax.swing.JTable getDataTable() {
         return DataTable;
     }
 
-    public int getRowCount() {
-        return DataTable.getRowCount();
+    public void addStatsListener(java.awt.event.ActionListener listener) {
+    showStats.setActionCommand("ShowStats");
+    showStats.addActionListener(listener);
     }
-
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -114,6 +139,17 @@ public MainWindow() {
         NewButton = new javax.swing.JButton();
         deleteButton = new javax.swing.JButton();
         UpdateButton = new javax.swing.JButton();
+        showStats = new javax.swing.JButton();
+        cmbEnrollClient = new javax.swing.JComboBox<>();
+        cmbEnrollActivity = new javax.swing.JComboBox<>();
+        squadLabel = new javax.swing.JLabel();
+        aLabel = new javax.swing.JLabel();
+        cLabel = new javax.swing.JLabel();
+        joinButton = new javax.swing.JButton();
+        fLabel = new javax.swing.JLabel();
+        cmbFilterDay = new javax.swing.JComboBox<>();
+        txtFilterPrice = new javax.swing.JTextField();
+        btnApplyFilter = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         InitMenu = new javax.swing.JMenu();
         jMenuItem5 = new javax.swing.JMenuItem();
@@ -181,6 +217,8 @@ public MainWindow() {
             }
         });
 
+        showStats.setText("Show Stats");
+
         javax.swing.GroupLayout BottomMenuPanelLayout = new javax.swing.GroupLayout(BottomMenuPanel);
         BottomMenuPanel.setLayout(BottomMenuPanelLayout);
         BottomMenuPanelLayout.setHorizontalGroup(
@@ -188,11 +226,13 @@ public MainWindow() {
             .addGroup(BottomMenuPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(NewButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(deleteButton)
-                .addGap(56, 56, 56)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(UpdateButton)
-                .addContainerGap())
+                .addGap(56, 56, 56)
+                .addComponent(showStats)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         BottomMenuPanelLayout.setVerticalGroup(
             BottomMenuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -201,17 +241,70 @@ public MainWindow() {
                 .addGroup(BottomMenuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(NewButton)
                     .addComponent(deleteButton)
-                    .addComponent(UpdateButton))
+                    .addComponent(UpdateButton)
+                    .addComponent(showStats))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
+
+        cmbEnrollClient.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbEnrollClient.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbEnrollClientActionPerformed(evt);
+            }
+        });
+
+        cmbEnrollActivity.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        squadLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        squadLabel.setText("JOIN THE SQUAD");
+
+        aLabel.setText("Activity:");
+
+        cLabel.setText("Candidate:");
+
+        joinButton.setText("Confirm");
+
+        fLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        fLabel.setText("Filter");
+
+        cmbFilterDay.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        txtFilterPrice.setText("jTextField1");
+
+        btnApplyFilter.setText("Apply");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 556, Short.MAX_VALUE)
             .addComponent(BottomMenuPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(fLabel)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(cmbFilterDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(txtFilterPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnApplyFilter))
+                            .addComponent(squadLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(cLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cmbEnrollClient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(aLabel)
+                        .addGap(8, 8, 8)
+                        .addComponent(cmbEnrollActivity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)))
+                .addComponent(joinButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -221,7 +314,23 @@ public MainWindow() {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(BottomMenuPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(fLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbFilterDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtFilterPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnApplyFilter))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                .addComponent(squadLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbEnrollClient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbEnrollActivity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cLabel)
+                    .addComponent(aLabel)
+                    .addComponent(joinButton))
+                .addGap(33, 33, 33))
         );
 
         InitMenu.setText("Init");
@@ -316,6 +425,10 @@ public MainWindow() {
         // TODO add your handling code here:
     }//GEN-LAST:event_UpdateButtonActionPerformed
 
+    private void cmbEnrollClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbEnrollClientActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbEnrollClientActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -344,7 +457,6 @@ public MainWindow() {
         //</editor-fold>
         //</editor-fold>
 
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new MainWindow().setVisible(true);
@@ -365,11 +477,22 @@ public MainWindow() {
     public javax.swing.JMenu TrainerView;
     public javax.swing.JButton UpdateButton;
     public javax.swing.JLabel ViewName;
+    private javax.swing.JLabel aLabel;
+    public javax.swing.JButton btnApplyFilter;
+    public javax.swing.JLabel cLabel;
+    public javax.swing.JComboBox<String> cmbEnrollActivity;
+    public javax.swing.JComboBox<String> cmbEnrollClient;
+    public javax.swing.JComboBox<String> cmbFilterDay;
     public javax.swing.JButton deleteButton;
+    public javax.swing.JLabel fLabel;
     public javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JPanel jPanel1;
     public javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
+    public javax.swing.JButton joinButton;
+    public javax.swing.JButton showStats;
+    public javax.swing.JLabel squadLabel;
+    public javax.swing.JTextField txtFilterPrice;
     // End of variables declaration//GEN-END:variables
 }

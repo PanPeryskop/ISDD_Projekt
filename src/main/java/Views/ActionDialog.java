@@ -39,6 +39,10 @@ public class ActionDialog extends javax.swing.JDialog {
                 dialoLabel.setText("Delete Record - Confirm?");
                 IdForm.setEditable(false);
                 setFieldsEditable(false);
+                
+                cmbDay.setEnabled(false);
+                cmbHour.setEnabled(false);
+                cmbGeneric.setEnabled(false);
             }
         }
     }
@@ -54,6 +58,10 @@ public class ActionDialog extends javax.swing.JDialog {
         emailForm.setEditable(editable);
         creationForm.setEditable(editable);
         jTextField7.setEditable(editable);
+        
+        cmbDay.setEnabled(editable);
+        cmbHour.setEnabled(editable);
+        cmbGeneric.setEnabled(editable);
     }
 
     public void clearFields() {
@@ -64,9 +72,14 @@ public class ActionDialog extends javax.swing.JDialog {
         emailForm.setText("");
         creationForm.setText("");
         jTextField7.setText("");
+        
+        if (cmbDay.getItemCount() > 0) cmbDay.setSelectedIndex(0);
+        if (cmbHour.getItemCount() > 0) cmbHour.setSelectedIndex(0);
+        if (cmbGeneric.getItemCount() > 0) cmbGeneric.setSelectedIndex(0);
     }
     
     public void configureForClient() {
+        dialoLabel.setText("Client Record");
         idLabel.setText("Client ID");
         IdLabel.setText("DNI");
         nameLabel.setText("Name");
@@ -74,9 +87,20 @@ public class ActionDialog extends javax.swing.JDialog {
         emailLabel.setText("Email");
         creationLabel.setText("Start Date");
         loginLabel.setText("Category");
+
+        phoneForm.setVisible(true);
+        cmbDay.setVisible(false);
+        
+        emailForm.setVisible(true);
+        cmbHour.setVisible(false);
+
+        jTextField7.setVisible(false);
+        cmbGeneric.setVisible(true);
+        cmbGeneric.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "A", "B", "C", "D", "E" }));
     }
 
     public void configureForTrainer() {
+        dialoLabel.setText("Trainer Record");
         idLabel.setText("Trainer COD");
         IdLabel.setText("ID Number");
         nameLabel.setText("Name");
@@ -84,34 +108,101 @@ public class ActionDialog extends javax.swing.JDialog {
         emailLabel.setText("Email");
         creationLabel.setText("Date");
         loginLabel.setText("Nick");
+
+        phoneForm.setVisible(true);
+        cmbDay.setVisible(false);
+        
+        emailForm.setVisible(true);
+        cmbHour.setVisible(false);
+        
+        jTextField7.setVisible(true);
+        cmbGeneric.setVisible(false);
     }
     
     public void configureForActivity() {
+        dialoLabel.setText("Activity Record");
         idLabel.setText("Activity ID");
         IdLabel.setText("Price");
         nameLabel.setText("Name");
+        
         phoneLabel.setText("Day");
+        phoneForm.setVisible(false);
+        cmbDay.setVisible(true);
+        cmbDay.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { 
+            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" 
+        }));
+
         emailLabel.setText("Hour");
+        emailForm.setVisible(false);
+        cmbHour.setVisible(true);
+        cmbHour.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { 
+            "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" 
+        }));
+        
         creationLabel.setText("Description");
-        loginLabel.setText("Trainer COD");
+        loginLabel.setText("Trainer");
+        
+        jTextField7.setVisible(false);
+        cmbGeneric.setVisible(true);
     }
     
     public String getIdValue() { return IdForm.getText().trim(); }
     public String getNameValue() { return NameForm.getText().trim(); }
     public String getIdNrValue() { return idNrForm.getText().trim(); }
-    public String getPhoneValue() { return phoneForm.getText().trim(); }
-    public String getEmailValue() { return emailForm.getText().trim(); }
-    public String getCreationValue() { return creationForm.getText().trim(); }
-    public String getExtraValue() { return jTextField7.getText().trim(); }
-
     
+    public String getPhoneValue() { 
+        if (cmbDay.isVisible()) return (String) cmbDay.getSelectedItem();
+        return phoneForm.getText().trim(); 
+    }
+    
+    public String getEmailValue() { 
+        if (cmbHour.isVisible()) return (String) cmbHour.getSelectedItem();
+        return emailForm.getText().trim(); 
+    }
+    
+    public String getCreationValue() { return creationForm.getText().trim(); }
+    
+    public String getExtraValue() { 
+        if (cmbGeneric.isVisible()) {
+            Object item = cmbGeneric.getSelectedItem();
+            return item != null ? item.toString() : "";
+        }
+        return jTextField7.getText().trim(); 
+    }
+
     public void setIdValue(String value) { IdForm.setText(value); }
     public void setNameValue(String value) { NameForm.setText(value); }
     public void setIdNrValue(String value) { idNrForm.setText(value); }
-    public void setPhoneValue(String value) { phoneForm.setText(value); }
-    public void setEmailValue(String value) { emailForm.setText(value); }
+    
+    public void setPhoneValue(String value) { 
+        if (cmbDay.isVisible()) cmbDay.setSelectedItem(value);
+        else phoneForm.setText(value); 
+    }
+    
+    public void setEmailValue(String value) { 
+        if (cmbHour.isVisible()) cmbHour.setSelectedItem(value);
+        else emailForm.setText(value); 
+    }
+    
     public void setCreationValue(String value) { creationForm.setText(value); }
-    public void setExtraValue(String value) { jTextField7.setText(value); }
+    
+    public void setExtraValue(String value) { 
+        if (cmbGeneric.isVisible()) {
+            javax.swing.DefaultComboBoxModel<String> model = (javax.swing.DefaultComboBoxModel<String>) cmbGeneric.getModel();
+            for(int i=0; i<model.getSize(); i++) {
+                String item = model.getElementAt(i);
+                if(item.contains(value)) { 
+                    cmbGeneric.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+        else jTextField7.setText(value); 
+    }
+    
+    public void setGenericComboModel(String[] items) {
+        cmbGeneric.setModel(new javax.swing.DefaultComboBoxModel<>(items));
+    }
 
     public void addConfirmListener(ActionListener listener) {
         confirmButton.addActionListener(listener);
@@ -154,6 +245,9 @@ public class ActionDialog extends javax.swing.JDialog {
         confirmButton = new javax.swing.JButton();
         cancellButton = new javax.swing.JButton();
         dialoLabel = new javax.swing.JLabel();
+        cmbDay = new javax.swing.JComboBox<>();
+        cmbHour = new javax.swing.JComboBox<>();
+        cmbGeneric = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -174,6 +268,12 @@ public class ActionDialog extends javax.swing.JDialog {
 
         IdForm.setEditable(false);
 
+        phoneForm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                phoneFormActionPerformed(evt);
+            }
+        });
+
         emailForm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 emailFormActionPerformed(evt);
@@ -191,55 +291,70 @@ public class ActionDialog extends javax.swing.JDialog {
 
         dialoLabel.setText("Dialog Label");
 
+        cmbDay.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        cmbHour.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        cmbGeneric.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(confirmButton)
-                .addGap(18, 18, 18)
-                .addComponent(cancellButton)
-                .addGap(55, 55, 55))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(32, 32, 32)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(nameLabel)
-                    .addComponent(idLabel)
-                    .addComponent(IdLabel)
-                    .addComponent(phoneLabel))
-                .addGap(12, 12, 12)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(dialoLabel)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
+                        .addGap(32, 32, 32)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(nameLabel)
+                            .addComponent(idLabel)
+                            .addComponent(IdLabel)
+                            .addComponent(phoneLabel))
+                        .addGap(12, 12, 12)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(IdForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(emailLabel))
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(IdForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(emailLabel))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(idNrForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(loginLabel)))
+                                        .addGap(44, 44, 44))
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(idNrForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
-                                        .addComponent(loginLabel)))
-                                .addGap(44, 44, 44))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(NameForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(creationLabel)))
-                        .addGap(24, 24, 24)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(emailForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(creationForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jTextField7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(34, 34, 34))
+                                        .addComponent(NameForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(creationLabel)))
+                                .addGap(24, 24, 24)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(emailForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(1, 1, 1)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(creationForm, javax.swing.GroupLayout.DEFAULT_SIZE, 71, Short.MAX_VALUE)
+                                            .addComponent(jTextField7))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(cmbGeneric, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(dialoLabel, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                        .addComponent(phoneForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(cmbDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(cmbHour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(phoneForm, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(confirmButton)))
+                .addGap(18, 18, 18)
+                .addComponent(cancellButton)
+                .addGap(55, 55, 55))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -263,12 +378,15 @@ public class ActionDialog extends javax.swing.JDialog {
                     .addComponent(IdLabel)
                     .addComponent(loginLabel)
                     .addComponent(idNrForm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbGeneric, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(phoneLabel)
-                    .addComponent(phoneForm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                    .addComponent(phoneForm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbHour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 59, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(confirmButton)
                     .addComponent(cancellButton))
@@ -285,6 +403,10 @@ public class ActionDialog extends javax.swing.JDialog {
     private void emailFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emailFormActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_emailFormActionPerformed
+
+    private void phoneFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_phoneFormActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_phoneFormActionPerformed
 
     /**
      * @param args the command line arguments
@@ -333,6 +455,9 @@ public class ActionDialog extends javax.swing.JDialog {
     public javax.swing.JLabel IdLabel;
     public javax.swing.JTextField NameForm;
     public javax.swing.JButton cancellButton;
+    public javax.swing.JComboBox<String> cmbDay;
+    public javax.swing.JComboBox<String> cmbGeneric;
+    public javax.swing.JComboBox<String> cmbHour;
     public javax.swing.JButton confirmButton;
     public javax.swing.JTextField creationForm;
     public javax.swing.JLabel creationLabel;
