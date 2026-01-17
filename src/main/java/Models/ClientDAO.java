@@ -84,8 +84,8 @@ public class ClientDAO {
 
     public Client getClientById(Session session, String id) {
         try {
-            Query<Client> query = session.createQuery("FROM Client c WHERE c.mId = :id", Client.class);
-            query.setParameter("id", id);
+            Query<Client> query = session.createQuery("FROM Client c WHERE c.mId = :idValue", Client.class);
+            query.setParameter("idValue", id);
             return query.getSingleResult();
         } catch (NoResultException e) {
             return null;

@@ -21,6 +21,7 @@ public class MainWindow extends javax.swing.JFrame {
         cmbFilterDay.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { 
             "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" 
         }));
+        txtFilterPrice.setText("");
     }
     
     public void addClientMenuListener(ActionListener listener) {
@@ -121,6 +122,67 @@ public class MainWindow extends javax.swing.JFrame {
     showStats.setActionCommand("ShowStats");
     showStats.addActionListener(listener);
     }
+    
+    public void setViewMode(String mode) {
+        switch (mode) {
+            case "Init" -> {
+                fLabel.setVisible(false);
+                cmbFilterDay.setVisible(false);
+                txtFilterPrice.setVisible(false);
+                btnApplyFilter.setVisible(false);
+
+                squadLabel.setVisible(false);
+                cLabel.setVisible(false);
+                aLabel.setVisible(false);
+                cmbEnrollClient.setVisible(false);
+                cmbEnrollActivity.setVisible(false);
+                joinButton.setVisible(false);
+
+                NewButton.setVisible(false);
+                deleteButton.setVisible(false);
+                UpdateButton.setVisible(false);
+                showStats.setVisible(false);
+            }
+            case "Clients", "Trainers" -> {
+                fLabel.setVisible(false);
+                cmbFilterDay.setVisible(false);
+                txtFilterPrice.setVisible(false);
+                btnApplyFilter.setVisible(false);
+
+                squadLabel.setVisible(false);
+                cLabel.setVisible(false);
+                aLabel.setVisible(false);
+                cmbEnrollClient.setVisible(false);
+                cmbEnrollActivity.setVisible(false);
+                joinButton.setVisible(false);
+
+                NewButton.setVisible(true);
+                deleteButton.setVisible(true);
+                UpdateButton.setVisible(true);
+                showStats.setVisible(false);
+            }
+            case "Activities" -> {
+                fLabel.setVisible(true);
+                cmbFilterDay.setVisible(true);
+                txtFilterPrice.setVisible(true);
+                btnApplyFilter.setVisible(true);
+
+                squadLabel.setVisible(true);
+                cLabel.setVisible(true);
+                aLabel.setVisible(true);
+                cmbEnrollClient.setVisible(true);
+                cmbEnrollActivity.setVisible(true);
+                joinButton.setVisible(true);
+
+                NewButton.setVisible(true);
+                deleteButton.setVisible(true);
+                UpdateButton.setVisible(true);
+                showStats.setVisible(true);
+            }
+        }
+    }
+
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -278,7 +340,7 @@ public class MainWindow extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 556, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 704, Short.MAX_VALUE)
             .addComponent(BottomMenuPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

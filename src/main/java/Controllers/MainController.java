@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+
+
 public class MainController implements ActionListener {
 
     private final SessionFactory sessionFactory;
@@ -40,6 +42,7 @@ public class MainController implements ActionListener {
         });
         
         showInit();
+        view.setViewMode("Init");
         view.setVisible(true);
     }
 
@@ -53,8 +56,8 @@ public class MainController implements ActionListener {
         view.addDeleteButtonListener(this);
         view.addUpdateButtonListener(this);
         
-        view.addApplyFilterListener(this); 
-        view.addJoinButtonListener(this); 
+        view.addApplyFilterListener(this);
+        view.addJoinButtonListener(this);
         view.addStatsListener(this);
     }
 
@@ -63,25 +66,28 @@ public class MainController implements ActionListener {
         switch (e.getActionCommand()) {
             case "ShowClients" -> {
                 currentView = "Clients";
+                view.setViewMode("Clients");
                 clientController.showAll();
             }
             case "ShowTrainers" -> {
                 currentView = "Trainers";
+                view.setViewMode("Trainers");
                 trainerController.showAll();
             }
             case "ShowActivities" -> {
                 currentView = "Activities";
+                view.setViewMode("Activities");
                 activityController.showAll();
                 activityController.loadEnrollmentData();
             }
             case "ShowInit" -> {
                 currentView = "Init";
+                view.setViewMode("Init");
                 showInit();
             }
             case "New" -> handleNew();
             case "Delete" -> handleDelete();
             case "Update" -> handleUpdate();
-            
             case "ApplyFilter" -> {
                 if ("Activities".equals(currentView)) {
                     activityController.filterActivitiesUI();
@@ -95,7 +101,9 @@ public class MainController implements ActionListener {
     private void showInit() {
         view.setViewName("Welcome to ISDD Project");
         view.setTableData(new String[]{"Info"}, new Object[][]{{"Select an option from the menu above"}});
+        view.setViewMode("Init");
     }
+
 
     private void handleNew() {
         switch (currentView) {
